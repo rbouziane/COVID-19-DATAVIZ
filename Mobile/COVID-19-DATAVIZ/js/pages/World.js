@@ -18,6 +18,7 @@ export default class World extends React.Component {
     }
     return cases;
   }
+  
   casesListFrance() {
     const cases = [];
     for (let i = 0; i < 10; i++) {
@@ -36,8 +37,8 @@ export default class World extends React.Component {
 
   render() {
     return (
-      <View style={{flex: 1, backgroundColor: "#404040"}}>
-        <View style={styles.container}>
+      <View style={{flex: 1, backgroundColor: "#222327"}}>
+        <View style={[styles.container, {borderBottomWidth: 3, borderColor: "grey"}]}>
           <Text style={styles.title}>Confirmed Cases by Country/Region(Deaths)</Text>
         </View>
         <View style={{flex: 3}}>
@@ -59,22 +60,22 @@ const styles = StyleSheet.create({
   },
   title: {
     fontWeight: 'bold',
-    fontSize: 30,
+    fontSize: 24,
     textAlign: 'center',
     color: 'white'
   },
   casesText: {
     fontWeight: 'bold',
-    fontSize: 25,
+    fontSize: 20,
     color: "#e60000"
   },
   deathText: {
     fontWeight: 'bold',
-    fontSize: 25,
+    fontSize: 20,
     color: "white"
   },
   border: {
     borderBottomWidth: 1,
-    borderColor: "#222327"
+    borderColor: "white"
   }
 });

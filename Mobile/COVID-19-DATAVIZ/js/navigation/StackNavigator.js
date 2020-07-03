@@ -76,15 +76,7 @@ const PlotsStackScreen = () => (
 
 const MapStackScreen = () => (
   <MapStack.Navigator screenOptions={{
-      headerStyle:{
-        backgroundColor: '#222327',
-      },
-      headerStatusBarHeigh: 1000,
-      headerTitleAlign: 'center',
-      headerTintColor: '#fff',
-      headerTitleStyle: {
-        fontWeight: 'bold'
-      }
+      headerShown: false
     }}>
     {StatusBar.setBarStyle('light-content', true)}
     <MapStack.Screen name="Map" component={MapScreen}/>
