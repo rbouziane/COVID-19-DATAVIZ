@@ -2,16 +2,15 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CovidData } from  '../covid-data.service';
 
 @Component({
-  selector: 'app-number-dead',
-  templateUrl: './number-dead.component.html',
-  styleUrls: ['./number-dead.component.scss']
+  selector: 'app-recovered',
+  templateUrl: './recovered.component.html',
+  styleUrls: ['./recovered.component.scss']
 })
-export class NumberDeadComponent implements OnInit {
+export class RecoveredComponent implements OnInit {
 
   public dataSet: any=[];
   public country: string;
-  public totalDeaths: number=0;
-  public newDeaths: number=0;
+  public totalRecovered: number=0;
 
   constructor(private service: CovidData) { }
 
@@ -19,11 +18,9 @@ export class NumberDeadComponent implements OnInit {
     this.service.getData().subscribe(v => {
       for(let val in v){
         this.dataSet.push(v[val]);
-        this.newDeaths+=parseInt(v[val].new_deaths.replace(",",""));
-        this.totalDeaths+=parseInt(v[val].deaths.replace(",",""));
+        this.totalRecovered+=parseInt(v[val].total_recovered.replace(",",""));
       }
     });
     console.log(this.dataSet);
   }
-
 }

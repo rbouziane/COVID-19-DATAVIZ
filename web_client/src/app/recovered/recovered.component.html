@@ -1,12 +1,11 @@
 <div>
   <div class="title">
-    <h3> Total deaths: </h3>
-    <h1>{{totalDeaths}}</h1>
+    <h3> Total Recovered by country </h3>
   </div>
 <cdk-virtual-scroll-viewport itemSize="100" class="container">
   <div *ngFor = "let data of dataSet" class="number">
     <div class="cases">
-      {{data.deaths}}
+      {{data.total_recovered}}
     </div>
     <div class="country">
       {{data.country_name}}

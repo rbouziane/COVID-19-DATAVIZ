@@ -1,0 +1,31 @@
+.number {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid maroon;
+  box-sizing: border-box;
+  height: 100px;
+  background-color: black;
+}
+
+.container {
+  background-color: black;
+  height: 400px;
+  width: 300px;
+}
+
+.title {
+  color: white;
+  background-color: black;
+  height: 120px;
+  width: 300px;
+}
+
+.cases{
+  color: red;
+  margin-right: 10px;
+}
+
+.country {
+  color: white;
+}
