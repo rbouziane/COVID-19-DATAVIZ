@@ -1,38 +1,52 @@
 import React from 'react';
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, ActivityIndicator } from 'react-native';
+
+import { getWorldConfirmedDeaths, numberWithSpaces } from "../Script/DataScript"
 
 export default class World extends React.Component {
 
-  casesListUS() {
+  constructor() {
+    super()
+
+    this.state = {
+      worldArray: [],
+      ready: false
+    }
+  }
+
+  casesList(data) {
     const cases = [];
-    for (let i = 0; i < 10; i++) {
       cases.push(
-        <View key={"guest_" + i} style={styles.border}>
+        <View key={"guest_" + data.name} style={styles.border}>
           <View style={{ margin: 10, flexDirection: "row"}}>
-            <Text style={styles.casesText}>2 422 312</Text>
+            <Text style={styles.casesText}>{numberWithSpaces(data.confirmed)}</Text>
             <Text style={styles.deathText}>  </Text>
-            <Text style={styles.deathText}>US (124 415)</Text>
+            <Text style={styles.deathText}>{data.name}</Text>
+            <Text style={styles.deathText}> (</Text>
+            <Text style={styles.deathText}>{numberWithSpaces(data.death)}</Text>
+            <Text style={styles.deathText}>)</Text>
           </View>
         </View>
       )
-    }
     return cases;
   }
-  
-  casesListFrance() {
-    const cases = [];
-    for (let i = 0; i < 10; i++) {
-      cases.push(
-        <View key={"guest_" + i} style={styles.border}>
-          <View style={{ margin: 10, flexDirection: "row"}}>
-            <Text style={styles.casesText}>197 885</Text>
-            <Text style={styles.deathText}>  </Text>
-            <Text style={styles.deathText}>France (29 755)</Text>
-          </View>
-        </View>
-      )
-    }
-    return cases;
+
+  async getData() {
+    const dataJson = require('../../data/last_data.json');
+    const totalsCountries = Object.keys(dataJson).length;
+
+    var worldArray = await getWorldConfirmedDeaths(dataJson, totalsCountries)
+
+    worldArray.sort((a, b) => {
+      return b.confirmed - a.confirmed
+    })
+
+    this.setState({worldArray: worldArray, ready: true})
+  }
+
+  componentDidMount()
+  {
+    this.getData()
   }
 
   render() {
@@ -42,10 +56,15 @@ export default class World extends React.Component {
           <Text style={styles.title}>Confirmed Cases by Country/Region(Deaths)</Text>
         </View>
         <View style={{flex: 3}}>
-          <ScrollView>
-            {this.casesListUS()}
-            {this.casesListFrance()}
-          </ScrollView>
+          {this.state.ready
+            ? <ScrollView>
+                {this.state.worldArray.map((data) => this.casesList(data))}
+              </ScrollView>
+            :
+              <View style={{flex: 1, justifyContent: 'center'}}>
+                <ActivityIndicator size="large" color="white"/>
+              </View>
+          }
         </View>
       </View>
     );
@@ -70,7 +89,6 @@ const styles = StyleSheet.create({
     color: "#e60000"
   },
   deathText: {
-    fontWeight: 'bold',
     fontSize: 20,
     color: "white"
   },

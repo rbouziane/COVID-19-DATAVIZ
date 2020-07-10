@@ -2,7 +2,9 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Searchbar } from 'react-native-paper';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps'
+
 import { getLatLong } from "../API/API"
+import { getCountryConfirmedDeaths, numberWithSpaces } from "../Script/DataScript"
 
 export default class Map extends React.Component {
 
@@ -30,7 +32,9 @@ export default class Map extends React.Component {
   // }
 
   async addMarkerCountry(country, latLng) {
-    var addCoordinates = ({name: country, lat: latLng.lat, lng: latLng.lng, case: "?"})
+    const dataJson = require('../../data/last_data.json');
+    var {confirmedCountry, deathCountry} = await getCountryConfirmedDeaths(dataJson, country)
+    var addCoordinates = ({name: country, lat: latLng.lat, lng: latLng.lng, caseConfirmed: confirmedCountry, caseDeath: deathCountry})
     var coordConcat = this.state.coordinates.concat(addCoordinates);
     this.setState({ coordinates: coordConcat })
   }
@@ -70,7 +74,7 @@ export default class Map extends React.Component {
               }}
               image={require('../../assets/map_marker.png')}
               title={marker.name}
-              description={"Confirmed Cases" + marker.case}
+              description={"Confirmed Cases: " + numberWithSpaces(marker.caseConfirmed) + ", Death Cases: " + numberWithSpaces(marker.caseDeath)}
             />
           ))}
         </MapView>
