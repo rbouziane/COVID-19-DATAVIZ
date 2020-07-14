@@ -15,10 +15,9 @@ from os.path import isfile, join
 import git
 from git import RemoteProgress
 
-class CloneProgress(RemoteProgress):
+class Progress(RemoteProgress):
     def update(self, op_code, cur_count, max_count=None, message=''):
-        if message:
-            print(message)
+        print (self._cur_line)
 
 def die(*args, **kwargs):
     file = kwargs.pop('file', sys.argv[0])
@@ -32,7 +31,7 @@ def get_data():
   dirname = os.getcwd() + '/data'
   remove_old(dirname)
   print('Cloning into %s' % dirname)
-  git.Repo.clone_from('https://github.com/CSSEGISandData/COVID-19.git', dirname)
+  git.Repo.clone_from('https://github.com/CSSEGISandData/COVID-19.git', dirname, progress = Progress())
   mypath = dirname + '/csse_covid_19_data/csse_covid_19_daily_reports/'
   os.remove(mypath + '/README.md')
   file_list = [f for f in listdir(mypath) if isfile(join(mypath, f))]
