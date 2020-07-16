@@ -104,20 +104,18 @@ def data_graphical(file_list, mypath, latestfile, jsonFilePath):
     except OSError:
         die('failed to open file', file = jsonFilePath)
 
-def check_row_graph(rows):
-    rows["Deaths"] = rows["Deaths"] if rows["Deaths"] != "" else 0
-    rows["Confirmed"] = rows["Confirmed"] if rows["Confirmed"] != "" else 0
+def file_filter(rows, curr_filter):
+    for filter_ in curr_filter:
+        rows[filter_] = rows[filter_] if rows[filter_] != "" else 0
     return rows
 
+def check_row_graph(rows):
+    graph_filter = ["Deaths", "Confirmed"]
+    return file_filter(rows, graph_filter)
+
 def check_row_actual(rows):
-    rows["Deaths"] = rows["Deaths"] if rows["Deaths"] != "" else 0
-    rows["Confirmed"] = rows["Confirmed"] if rows["Confirmed"] != "" else 0
-    rows["Recovered"] = rows["Recovered"] if rows["Recovered"] != "" else 0
-    rows["Lat"] = rows["Lat"] if rows["Lat"] != "" else 0
-    rows["Long_"] = rows["Long_"] if rows["Long_"] != "" else 0
-    rows["Incidence_Rate"] = rows["Incidence_Rate"] if rows["Incidence_Rate"] != "" else 0
-    rows["Case-Fatality_Ratio"] = rows["Case-Fatality_Ratio"] if rows["Case-Fatality_Ratio"] != "" else 0
-    return rows
+    raw_filter = ["Deaths", "Confirmed", "Recovered", "Lat", "Long_", "Incidence_Rate", "Case-Fatality_Ratio"]
+    return file_filter(rows, raw_filter)
 
 def create_new_json(latestfile, mypath, jsonFilePath):
     print("Starting recent data filter.")
