@@ -2,17 +2,20 @@ export function numberWithSpaces(number) {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")
 }
 
-export async function getCountryConfirmedDeaths(dataJson, countryName) {
-    var confirmedCountry = 0
-    var deathCountry = 0
-    var countryRegionsNumbers = Object.keys(dataJson[countryName]).length;
+export async function getTotalsConfirmedDeaths(dataJson, countriesNumbers) {
+  var totalsConfirmed = 0;
+  var totalsDeath = 0;
 
+  for (var i = 0; i < countriesNumbers; i++) {
+    var countryName = Object.keys(dataJson)[i];
+    var countryRegionsNumbers = Object.keys(dataJson[countryName]).length;
     for (var j = 0; j < countryRegionsNumbers; j++) {
       var regionName = Object.keys(dataJson[countryName])[j];
-      confirmedCountry += parseInt(dataJson[countryName][regionName].Confirmed)
-      deathCountry += parseInt(dataJson[countryName][regionName].Deaths)
+      totalsConfirmed += parseInt(dataJson[countryName][regionName].Confirmed)
+      totalsDeath += parseInt(dataJson[countryName][regionName].Deaths)
     }
-    return {confirmedCountry, deathCountry}
+  }
+  return {totalsConfirmed, totalsDeath}
 }
 
 export async function getWorldConfirmedDeaths(dataJson, countriesNumbers) {
@@ -34,18 +37,15 @@ export async function getWorldConfirmedDeaths(dataJson, countriesNumbers) {
   return worldArray
 }
 
-export async function getTotalsConfirmedDeaths(dataJson, countriesNumbers) {
-  var totalsConfirmed = 0;
-  var totalsDeath = 0;
-
-  for (var i = 0; i < countriesNumbers; i++) {
-    var countryName = Object.keys(dataJson)[i];
+export async function getCountryConfirmedDeaths(dataJson, countryName) {
+    var confirmedCountry = 0
+    var deathCountry = 0
     var countryRegionsNumbers = Object.keys(dataJson[countryName]).length;
+
     for (var j = 0; j < countryRegionsNumbers; j++) {
       var regionName = Object.keys(dataJson[countryName])[j];
-      totalsConfirmed += parseInt(dataJson[countryName][regionName].Confirmed)
-      totalsDeath += parseInt(dataJson[countryName][regionName].Deaths)
+      confirmedCountry += parseInt(dataJson[countryName][regionName].Confirmed)
+      deathCountry += parseInt(dataJson[countryName][regionName].Deaths)
     }
-  }
-  return {totalsConfirmed, totalsDeath}
+    return {confirmedCountry, deathCountry}
 }

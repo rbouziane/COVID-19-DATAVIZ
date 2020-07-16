@@ -1,12 +1,14 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Searchbar } from 'react-native-paper';
-import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps'
+import MapView, {PROVIDER_GOOGLE, Marker, Circle} from 'react-native-maps'
 
 import { getLatLong } from "../API/API"
 import { getCountryConfirmedDeaths, numberWithSpaces } from "../Script/DataScript"
 
 export default class Map extends React.Component {
+
+  _isMounted = false
 
   constructor() {
       super();
@@ -17,19 +19,11 @@ export default class Map extends React.Component {
         latDelta: 100,
         lngDelta: 100,
         searchQuery: '',
-        coordinates: []
+        coordinates: [],
+        circleArray: [],
+        ready: false
       }
   }
-
-  // componentDidMount() {
-  //   this.addMarkerCountry("France")
-  //   this.addMarkerCountry("USA")
-  //   this.addMarkerCountry("Espagne")
-  //   this.addMarkerCountry("Chine")
-  //   this.addMarkerCountry("Brésil")
-  //   this.addMarkerCountry("Bénin")
-  //   this.addMarkerCountry("Canada")
-  // }
 
   async addMarkerCountry(country, latLng) {
     const dataJson = require('../../data/last_data.json');
@@ -40,16 +34,54 @@ export default class Map extends React.Component {
   }
 
   async fetchNews(country) {
-    let addMarker = true
-    for (let valueCoord of this.state.coordinates) {
-      if (valueCoord.name == country)
-        addMarker = false
+    if (country != "") {
+      let addMarker = true
+      for (let valueCoord of this.state.coordinates) {
+        if (valueCoord.name == country)
+          addMarker = false
+      }
+      let latLng = await getLatLong(country)
+      if (addMarker == true) {
+        this.addMarkerCountry(country, latLng)
+      }
+      this.setState({ lat: latLng.lat, lng: latLng.lng, latDelta: 50, lngDelta: 50 });
     }
-    let latLng = await getLatLong(country)
-    if (addMarker == true) {
-      this.addMarkerCountry(country, latLng)
+  }
+
+  async getCircleData() {
+    var circleArray = []
+
+    const dataJson = require('../../data/last_data.json');
+    const countriesNumbers = Object.keys(dataJson).length;
+
+    for (var i = 0; i < 10; i++) {
+      console.log(i)
+      var countryName = Object.keys(dataJson)[i];
+      var countryRegionsNumbers = Object.keys(dataJson[countryName]).length;
+      var confirmedCountry = 0
+      var deathCountry = 0
+
+      for (var j = 0; j < countryRegionsNumbers; j++) {
+        var regionName = Object.keys(dataJson[countryName])[j];
+        confirmedCountry += parseInt(dataJson[countryName][regionName].Confirmed)
+        deathCountry += parseInt(dataJson[countryName][regionName].Deaths)
+      }
+      let latLng = await getLatLong(countryName)
+      circleArray.push({name: countryName, confirmed: confirmedCountry, death: deathCountry, lat: latLng.lat, lng: latLng.lng})
+      if (this._isMounted) {
+        this.setState({circleArray: circleArray, ready: true})
+      }
     }
-    this.setState({ lat: latLng.lat, lng: latLng.lng, latDelta: 50, lngDelta: 50 });
+  }
+
+  componentDidMount()
+  {
+    this._isMounted = true;
+    this.getCircleData()
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   render() {
@@ -57,28 +89,42 @@ export default class Map extends React.Component {
       <View style={{flex: 1, backgroundColor: '#222327'}}>
         <MapView
           provider={PROVIDER_GOOGLE}
-          region={{
+          rotateEnabled={false}
+          initialRegion={{
             latitude: this.state.lat,
             longitude: this.state.lng,
             latitudeDelta: this.state.latDelta,
             longitudeDelta: this.state.lngDelta
           }}
+          onRegionChangeComplete={(selectedRegion) => this.setState({lat: selectedRegion.latitude, lng: selectedRegion.longitude, latDelta: selectedRegion.latitudeDelta, lngDelta: selectedRegion.longitudeDelta})}
           style={{flex: 1}}>
           {/*loop to print marker on the map*/}
-          {this.state.coordinates.map((marker, index) => (
-            <Marker
-              key={index}
-              coordinate={{
-                latitude: marker.lat,
-                longitude: marker.lng
-              }}
-              image={require('../../assets/map_marker.png')}
-              title={marker.name}
-              description={"Confirmed Cases: " + numberWithSpaces(marker.caseConfirmed) + ", Death Cases: " + numberWithSpaces(marker.caseDeath)}
-            />
+          {this.state.circleArray.map((circle, index) => (
+            <View key={index}>
+            <TouchableOpacity style={{backgroundColor: "red"}} onPress={() => console.log("press")}>
+              <Circle
+                center={{
+                  latitude: circle.lat,
+                  longitude: circle.lng
+                }}
+                radius={2.5 * circle.confirmed}
+                fillColor={'rgba(255, 0, 0, 0.5)'}
+              />
+              </TouchableOpacity>
+              <Marker
+                coordinate={{
+                  latitude: circle.lat,
+                  longitude: circle.lng
+                }}
+                image={require('../../assets/clickCircle.png')}
+                title={circle.name}
+                style={{width: 15, height: 15}}
+                description={"Confirmed Cases: " + numberWithSpaces(circle.confirmed) + ", Death Cases: " + numberWithSpaces(circle.death)}
+              />
+            </View>
           ))}
         </MapView>
-        <View style={styles.searchBox}>
+        {/*<View style={styles.searchBox}>
           <Searchbar
             style={styles.searchBar}
             placeholder="Find country"
@@ -86,7 +132,7 @@ export default class Map extends React.Component {
             onChangeText={(searchtext) => this.setState({ searchQuery: searchtext})}
             value={this.state.searchQuery}
           />
-        </View>
+        </View>*/}
       </View>
     );
   }

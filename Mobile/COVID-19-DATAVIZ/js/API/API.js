@@ -1,5 +1,5 @@
 export async function getLatLong(country) {
-    var key = "5JfT6iFVD8cIebc5OOGQpJVUOB9QT51v"
+    var key = "pYiMIGj9oKsSUiMkqBH7kj46FKT4hDiL"
 
     var url = "http://open.mapquestapi.com/geocoding/v1/address?key=" + key + "&location=" + country + "&thumbMaps=false&maxResults=1"
 
