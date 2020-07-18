@@ -80,7 +80,7 @@ def data_graphical(file_list, mypath, latestfile, jsonFilePath):
 
 def file_filter(rows, curr_filter):
     for filter_ in curr_filter:
-        rows[filter_] = rows[filter_] if rows[filter_] != "" else 0
+        rows[filter_] = rows[filter_] or 0
     return rows
 
 def check_row_graph(rows):
