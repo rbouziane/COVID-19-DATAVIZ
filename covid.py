@@ -66,35 +66,9 @@ def data_graphical(file_list, mypath, latestfile, jsonFilePath):
                 data[date]["Total_Deaths"] = 0
                 csvreader = csv.DictReader(current)
                 for rows in csvreader:
-                    if "Country/Region" in rows:
-                        if rows["Country/Region"] not in data[date]:
-                            rows = check_row_graph(rows)
-                            if rows["Country/Region"] == "Mainland China":
-                                if not "China" in data[date]:
-                                    data[date]["China"] = {}
-                                    data[date]["China"]["Confirmed"] = 0
-                                    data[date]["China"]["Deaths"] = 0
-                                data[date]["China"]["Confirmed"] += int(rows["Confirmed"])
-                                data[date]["Total_Confirmed"] += int(rows["Confirmed"])
-                                data[date]["China"]["Deaths"] += int(rows["Deaths"])
-                                data[date]["Total_Deaths"] += int(rows["Deaths"])
-                            else:
-                                data[date][rows["Country/Region"]] = {}
-                                data[date][rows["Country/Region"]]["Confirmed"] = 0
-                                data[date][rows["Country/Region"]]["Deaths"] = 0
-                                data[date][rows["Country/Region"]]["Confirmed"] += int(rows["Confirmed"])
-                                data[date]["Total_Confirmed"] += int(rows["Confirmed"])
-                                data[date][rows["Country/Region"]]["Deaths"] += int(rows["Deaths"])
-                                data[date]["Total_Deaths"] += int(rows["Deaths"])
-                    else:
-                        if rows["Country_Region"] not in data[date]:
-                            data[date][rows["Country_Region"]] = {}
-                            data[date][rows["Country_Region"]]["Confirmed"] = 0
-                            data[date][rows["Country_Region"]]["Deaths"] = 0
-                        data[date][rows["Country_Region"]]["Confirmed"] += int(rows["Confirmed"])
-                        data[date]["Total_Confirmed"] += int(rows["Confirmed"])
-                        data[date][rows["Country_Region"]]["Deaths"] += int(rows["Deaths"])
-                        data[date]["Total_Deaths"] += int(rows["Deaths"])
+                    rows = check_row_graph(rows)
+                    data[date]["Total_Confirmed"] += int(rows["Confirmed"])
+                    data[date]["Total_Deaths"] += int(rows["Deaths"])
         except OSError:
             die('failed to open file', file = file)
 
@@ -114,7 +88,7 @@ def check_row_graph(rows):
     return file_filter(rows, graph_filter)
 
 def check_row_actual(rows):
-    raw_filter = ["Deaths", "Confirmed", "Recovered", "Lat", "Long_", "Incidence_Rate", "Case-Fatality_Ratio"]
+    raw_filter = ["Deaths", "Confirmed", "Lat", "Long_"]
     return file_filter(rows, raw_filter)
 
 def create_new_json(latestfile, mypath, jsonFilePath):
@@ -133,16 +107,11 @@ def create_new_json(latestfile, mypath, jsonFilePath):
                     data[rows["Country_Region"]][rows["Province_State"]] = {}
                     data[rows["Country_Region"]][rows["Province_State"]]["Confirmed"] = 0
                     data[rows["Country_Region"]][rows["Province_State"]]["Deaths"] = 0
-                    data[rows["Country_Region"]][rows["Province_State"]]["Recovered"] = 0
 
                 data[rows["Country_Region"]][rows["Province_State"]]["Confirmed"] += int(rows["Confirmed"])
                 data[rows["Country_Region"]][rows["Province_State"]]["Deaths"] += int(rows["Deaths"])
-                data[rows["Country_Region"]][rows["Province_State"]]["Recovered"] += int(rows["Recovered"])
                 data[rows["Country_Region"]][rows["Province_State"]]["Latitude"] = float(rows["Lat"])
                 data[rows["Country_Region"]][rows["Province_State"]]["Longitude"] = float(rows["Long_"])
-                data[rows["Country_Region"]][rows["Province_State"]]["Incidence_Rate"] = float(rows["Incidence_Rate"])
-                data[rows["Country_Region"]][rows["Province_State"]]["Case-Fatality_Ratio"] = float(rows["Case-Fatality_Ratio"])
-                data[rows["Country_Region"]][rows["Province_State"]]["Last_update"] = rows["Last_Update"]
     except OSError:
         die('failed to open file', file = file)
 
