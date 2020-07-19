@@ -1,10 +1,8 @@
 import React from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import { Searchbar } from 'react-native-paper';
+import { StyleSheet, View, TouchableOpacity, ActivityIndicator } from 'react-native';
 import MapView, {PROVIDER_GOOGLE, Marker, Circle} from 'react-native-maps'
 
-import { getLatLong } from "../API/API"
-import { getCountryConfirmedDeaths, numberWithSpaces } from "../Script/DataScript"
+import { numberWithSpaces } from "../Script/DataScript"
 
 export default class Map extends React.Component {
 
@@ -18,34 +16,9 @@ export default class Map extends React.Component {
         lng: 10,
         latDelta: 100,
         lngDelta: 100,
-        searchQuery: '',
-        coordinates: [],
         circleArray: [],
         ready: false
       }
-  }
-
-  async addMarkerCountry(country, latLng) {
-    const dataJson = require('../../data/last_data.json');
-    var {confirmedCountry, deathCountry} = await getCountryConfirmedDeaths(dataJson, country)
-    var addCoordinates = ({name: country, lat: latLng.lat, lng: latLng.lng, caseConfirmed: confirmedCountry, caseDeath: deathCountry})
-    var coordConcat = this.state.coordinates.concat(addCoordinates);
-    this.setState({ coordinates: coordConcat })
-  }
-
-  async fetchNews(country) {
-    if (country != "") {
-      let addMarker = true
-      for (let valueCoord of this.state.coordinates) {
-        if (valueCoord.name == country)
-          addMarker = false
-      }
-      let latLng = await getLatLong(country)
-      if (addMarker == true) {
-        this.addMarkerCountry(country, latLng)
-      }
-      this.setState({ lat: latLng.lat, lng: latLng.lng, latDelta: 50, lngDelta: 50 });
-    }
   }
 
   async getCircleData() {
@@ -54,22 +27,28 @@ export default class Map extends React.Component {
     const dataJson = require('../../data/last_data.json');
     const countriesNumbers = Object.keys(dataJson).length;
 
-    for (var i = 0; i < 10; i++) {
-      console.log(i)
+    for (var i = 0; i < countriesNumbers; i++) {
       var countryName = Object.keys(dataJson)[i];
       var countryRegionsNumbers = Object.keys(dataJson[countryName]).length;
-      var confirmedCountry = 0
-      var deathCountry = 0
 
       for (var j = 0; j < countryRegionsNumbers; j++) {
         var regionName = Object.keys(dataJson[countryName])[j];
-        confirmedCountry += parseInt(dataJson[countryName][regionName].Confirmed)
-        deathCountry += parseInt(dataJson[countryName][regionName].Deaths)
-      }
-      let latLng = await getLatLong(countryName)
-      circleArray.push({name: countryName, confirmed: confirmedCountry, death: deathCountry, lat: latLng.lat, lng: latLng.lng})
-      if (this._isMounted) {
-        this.setState({circleArray: circleArray, ready: true})
+        if (regionName != "Unknown" && regionName != "Recovered") {
+          if (dataJson[countryName][regionName].Latitude != 0 && dataJson[countryName][regionName].Longitude != 0 && dataJson[countryName][regionName].Incidence_Rate != 0) {
+            if (regionName == "") {
+              circleArray.push({name: countryName, confirmed: dataJson[countryName][regionName].Confirmed, death: dataJson[countryName][regionName].Deaths, lat: parseInt(dataJson[countryName][regionName].Latitude), lng: parseInt(dataJson[countryName][regionName].Longitude), incidence: parseInt(dataJson[countryName][regionName].Incidence_Rate)})
+              if (this._isMounted) {
+                this.setState({circleArray: circleArray})
+              }
+            }
+            else {
+              circleArray.push({name: regionName, confirmed: dataJson[countryName][regionName].Confirmed, death: dataJson[countryName][regionName].Deaths, lat: parseInt(dataJson[countryName][regionName].Latitude), lng: parseInt(dataJson[countryName][regionName].Longitude), incidence: parseInt(dataJson[countryName][regionName].Incidence_Rate)})
+              if (this._isMounted) {
+                this.setState({circleArray: circleArray})
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -84,7 +63,18 @@ export default class Map extends React.Component {
     this._isMounted = false;
   }
 
-  render() {
+  radiusCercle(confirmed) {
+    if (2.5 * confirmed < 10000) {
+      return 50 * confirmed
+    }
+    else if (2.5 * confirmed < 50000) {
+      return 4 * confirmed
+    }
+    else
+      return 2.5 * confirmed
+  }
+
+  mapVisual() {
     return (
       <View style={{flex: 1, backgroundColor: '#222327'}}>
         <MapView
@@ -96,9 +86,10 @@ export default class Map extends React.Component {
             latitudeDelta: this.state.latDelta,
             longitudeDelta: this.state.lngDelta
           }}
+
           onRegionChangeComplete={(selectedRegion) => this.setState({lat: selectedRegion.latitude, lng: selectedRegion.longitude, latDelta: selectedRegion.latitudeDelta, lngDelta: selectedRegion.longitudeDelta})}
           style={{flex: 1}}>
-          {/*loop to print marker on the map*/}
+          {/*loop to print circle and marker on the map*/}
           {this.state.circleArray.map((circle, index) => (
             <View key={index}>
             <TouchableOpacity style={{backgroundColor: "red"}} onPress={() => console.log("press")}>
@@ -107,7 +98,7 @@ export default class Map extends React.Component {
                   latitude: circle.lat,
                   longitude: circle.lng
                 }}
-                radius={2.5 * circle.confirmed}
+                radius={this.radiusCercle(circle.confirmed)}
                 fillColor={'rgba(255, 0, 0, 0.5)'}
               />
               </TouchableOpacity>
@@ -124,37 +115,31 @@ export default class Map extends React.Component {
             </View>
           ))}
         </MapView>
-        {/*<View style={styles.searchBox}>
-          <Searchbar
-            style={styles.searchBar}
-            placeholder="Find country"
-            onSubmitEditing={() => this.fetchNews(this.state.searchQuery)}
-            onChangeText={(searchtext) => this.setState({ searchQuery: searchtext})}
-            value={this.state.searchQuery}
-          />
-        </View>*/}
-      </View>
+        {/*this.state.ready == false
+          &&
+            <View style={styles.indicatorView}>
+              <ActivityIndicator size="large" color="blue"/>
+            </View>
+        */}
+        </View>
     );
+  }
+
+  render() {
+    return (
+      <View style={{flex: 1, backgroundColor: '#222327'}}>
+        {this.mapVisual()}
+      </View>
+    )
   }
 }
 
-const styles = StyleSheet.create({
-  searchBar: {
-    flex: 1,
-    borderRadius: 20,
-    shadowColor: '#ccc',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.5,
-    shadowRadius: 5,
-    elevation: 10,
-    backgroundColor: "#b0abaa",
-  },
-  searchBox: {
-    position:'absolute',
-    marginTop: '12%',
-    flexDirection:"row",
-    width: '90%',
-    height: '3%',
-    alignSelf:'center',
-  }
-});
+// const styles = StyleSheet.create({
+//   indicatorView: {
+//     flex: 1,
+//     position:'absolute',
+//     alignSelf:'center',
+//     marginTop: '100%',
+//     justifyContent: 'center'
+//   }
+// });

@@ -13,7 +13,7 @@ import TotalsScreen from '../pages/Totals'
 import WorldScreen from '../pages/World'
 import PlotsScreen from '../pages/Plots'
 import MapScreen from '../pages/Map'
-import USScreen from '../pages/US'
+import CountryScreen from '../pages/Country'
 
 const Navigator = createBottomTabNavigator();
 
@@ -21,7 +21,7 @@ const TotalsStack = createStackNavigator();
 const WorldStack = createStackNavigator();
 const PlotsStack = createStackNavigator();
 const MapStack = createStackNavigator();
-const USStack = createStackNavigator();
+const CountryStack = createStackNavigator();
 
 const TotalsStackScreen = () => (
   <TotalsStack.Navigator screenOptions={{
@@ -83,8 +83,8 @@ const MapStackScreen = () => (
   </MapStack.Navigator>
 )
 
-const USStackScreen = () => (
-  <USStack.Navigator screenOptions={{
+const CountryStackScreen = () => (
+  <CountryStack.Navigator screenOptions={{
       headerStyle:{
         backgroundColor: '#222327',
       },
@@ -96,8 +96,8 @@ const USStackScreen = () => (
       }
     }}>
     {StatusBar.setBarStyle('light-content', true)}
-    <USStack.Screen name="US" component={USScreen}/>
-  </USStack.Navigator>
+    <CountryStack.Screen name="Country" component={CountryScreen}/>
+  </CountryStack.Navigator>
 )
 
 export default function HomeStackNavigator() {
@@ -114,7 +114,7 @@ export default function HomeStackNavigator() {
       <Navigator.Screen name="World" options={{tabBarIcon: props => (<Fontisto name="world" size={props.size} color={props.color}/>)}} component={WorldStackScreen}/>
       <Navigator.Screen name="Plots" options={{tabBarIcon: props => (<Foundation name="results-demographics" size={props.size} color={props.color}/>)}} component={PlotsStackScreen}/>
       <Navigator.Screen name="Map" options={{tabBarIcon: props => (<FontAwesome5 name="map" size={props.size} color={props.color}/>)}} component={MapStackScreen}/>
-      <Navigator.Screen name="US" options={{tabBarIcon: props => (<FontAwesome5 name="flag-usa" size={props.size} color={props.color}/>)}} component={USStackScreen}/>
+      <Navigator.Screen name="Country" options={{tabBarIcon: props => (<FontAwesome5 name="flag" size={props.size} color={props.color}/>)}} component={CountryStackScreen}/>
     </Navigator.Navigator>
   )
 }

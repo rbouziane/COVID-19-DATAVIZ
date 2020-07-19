@@ -37,15 +37,56 @@ export async function getWorldConfirmedDeaths(dataJson, countriesNumbers) {
   return worldArray
 }
 
-export async function getCountryConfirmedDeaths(dataJson, countryName) {
-    var confirmedCountry = 0
-    var deathCountry = 0
-    var countryRegionsNumbers = Object.keys(dataJson[countryName]).length;
+export async function getPlotsConfirmedDeaths(dataGraphicalJson, dataNumbers) {
+  var confirmedArray = []
+  var deathArray = []
+  var monthNameTab = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "June",
+    "July",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ]
+  var monthArray = []
 
-    for (var j = 0; j < countryRegionsNumbers; j++) {
-      var regionName = Object.keys(dataJson[countryName])[j];
+  for (var i = 0; i < dataNumbers; i++) {
+    var date = Object.keys(dataGraphicalJson)[i];
+    var month = date.split('-')[0]
+    month = parseInt(month) - 1
+    if (monthArray.indexOf(monthNameTab[month]) == -1)
+      monthArray.push(monthNameTab[month])
+    confirmedArray.push(parseInt(dataGraphicalJson[date].Total_Confirmed) / 1000000)
+    deathArray.push(parseInt(dataGraphicalJson[date].Total_Deaths) / 1000)
+  }
+  return {monthArray, confirmedArray, deathArray}
+}
+
+export async function getSearchCountryConfirmedDeaths(dataJson, countryName) {
+  var countryArray = []
+  var confirmedCountry = 0
+  try {
+    var countryRegionsNumbers = Object.keys(dataJson[countryName]).length;
+  } catch (error) {
+    return {confirmedCountry, countryArray}
+  }
+  for (var j = 0; j < countryRegionsNumbers; j++) {
+    var regionName = Object.keys(dataJson[countryName])[j];
+    if (regionName != "Unknown" && regionName != "Recovered") {
+      if (regionName == "") {
+        countryArray.push({name: countryName, confirmed: parseInt(dataJson[countryName][regionName].Confirmed), death: parseInt(dataJson[countryName][regionName].Deaths)})
+      }
+      else {
+        countryArray.push({name: regionName, confirmed: parseInt(dataJson[countryName][regionName].Confirmed), death: parseInt(dataJson[countryName][regionName].Deaths)})
+      }
       confirmedCountry += parseInt(dataJson[countryName][regionName].Confirmed)
-      deathCountry += parseInt(dataJson[countryName][regionName].Deaths)
     }
-    return {confirmedCountry, deathCountry}
+  }
+  return {confirmedCountry, countryArray}
 }
